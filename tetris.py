@@ -156,13 +156,33 @@ def create_grid(locked_positions={}):
     return grid
 
 def convert_shape_format(shape):
-    pass
+    positions = []
+    formatShape = shape.shape[ shape.rotation%len(shape.shape) ]
+    for i, line in enumerate(formatShape):
+        row = list(line)
+        for j, column in enumerate(row):
+            if column == "0":
+                positions.append( (shape.x + j, shape.y + i) )
+    for i, pos in enumerate(positions):
+        positions[i] = (pos[0] - 2, pos[1] - 4)
 
 def valid_space(shape, grid):
-    pass
+    accepted_positions = [[(j, i) for j in range(10) if grid[i][j] == (0,0,0)] for i in range(20)]
+    accepted_positions = [j for sub in accepted_positions for j in sub]
+    formatted = convert_shape_format(shape)
+ 
+    for pos in formatted:
+        if pos not in accepted_positions:
+            if pos[1] > -1:
+                return False
+    return True
 
 def check_lost(positions):
-    pass
+    for pos in positions:
+        x, y = pos
+        if y < 1:
+            return True
+    return False
 
 def get_shape():
     return Piece(5, 0, random.choice( shapes ))
@@ -171,11 +191,13 @@ def draw_text_middle(text, size, color, surface):
     pass
    
 def draw_grid(surface, row, col):
-    for row in range( len(grid) ):
-        for col in range( len(grid[i]) ):
-            pygame.draw.rect( surface, grid[row][col], (top_left_x + j*block_size, top_left_y + i*block_size, block_size, block_size), 0 )
-    pygame.draw.rect(surface, (255, 0, 0), (top_left_x, top_left_y, play_width, play_height), 4)
-    
+# This function draws the grey grid lines that we see
+    sx = top_left_x
+    sy = top_left_y
+    for i in range(row):
+        pygame.draw.line(surface, (128,128,128), (sx, sy+ i*30), (sx + play_width, sy + i * 30))  # horizontal lines
+        for j in range(col):
+            pygame.draw.line(surface, (128,128,128), (sx + j * 30, sy), (sx + j * 30, sy + play_height))  # vertical lines
 
 def clear_rows(grid, locked):
     pass
@@ -189,7 +211,14 @@ def draw_window(surface, grid):
     font = pygame.font.SysFont("comicsans", 60) 
     label = font.render( "Tetris", 1, (255, 255, 255) )
     surface.blit( label, ( top_left_x + play_width/2-label.get_width()/2, 30 ) )
-    draw_grid()
+    
+    for row in range( len(grid) ):
+        for col in range( len(grid[i]) ):
+            pygame.draw.rect( surface, grid[row][col], (top_left_x + j*block_size, top_left_y + i*block_size, block_size, block_size), 0 )
+    pygame.draw.rect(surface, (255, 0, 0), (top_left_x, top_left_y, play_width, play_height), 4)
+    
+
+    draw_grid(surface, grid)
     pygame.display.update()
 
 
